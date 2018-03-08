@@ -99,7 +99,7 @@ namespace Test.ADAL.NET.Integration
             var result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword));
+                        new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword)).ConfigureAwait(false);
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
             Assert.AreEqual("some-access-token", result.AccessToken);
@@ -116,7 +116,7 @@ namespace Test.ADAL.NET.Integration
 
         [TestMethod]
         [Description("Test for AcquireToken with valid token in cache")]
-        public async Task AcquireTokenWithValidTokenInCache_ReturnsCachedToken()
+        public async Task AcquireTokenWithValidTokenInCache_ReturnsCachedTokenAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
@@ -132,7 +132,7 @@ namespace Test.ADAL.NET.Integration
             };
 
             var result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                                                         new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword));
+                                                         new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword)).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("existing-access-token", result.AccessToken);
@@ -145,7 +145,7 @@ namespace Test.ADAL.NET.Integration
 
         [TestMethod]
         [Description("Test for AcquireToken for a user when a valid access token already exists in cache for another user.")]
-        public async Task AcquireTokenWithValidAccessTokenInCacheForAnotherUser_GetsTokenFromService()
+        public async Task AcquireTokenWithValidAccessTokenInCacheForAnotherUser_GetsTokenFromServiceAsync()
         {
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(
             TestConstants.DefaultAuthorityCommonTenant + "userrealm/user2@id.com")
@@ -196,7 +196,7 @@ namespace Test.ADAL.NET.Integration
             var result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        new UserPasswordCredential("user2@id.com", TestConstants.DefaultPassword));
+                        new UserPasswordCredential("user2@id.com", TestConstants.DefaultPassword)).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
@@ -217,11 +217,11 @@ namespace Test.ADAL.NET.Integration
 
         [TestMethod]
         [Description("Test case with expired access token and valid refresh token in cache. This should result in refresh token being used to get new AT instead of user creds")]
-        public async Task AcquireTokenWithExpiredAccessTokenAndValidRefreshToken_GetsATUsingRT()
+        public async Task AcquireTokenWithExpiredAccessTokenAndValidRefreshToken_GetsATUsingRTAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
-            await context.TokenCache.StoreToCache(new AdalResultWrapper
+            await context.TokenCache.StoreToCacheAsync(new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
@@ -236,7 +236,7 @@ namespace Test.ADAL.NET.Integration
                 },
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-            new RequestContext(new AdalLogger(new Guid())));
+            new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
             ResetInstanceDiscovery();
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
@@ -251,7 +251,7 @@ namespace Test.ADAL.NET.Integration
             });
 
             var result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                                                         new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword));
+                                                         new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword)).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);
@@ -259,7 +259,7 @@ namespace Test.ADAL.NET.Integration
             Assert.IsNotNull(result.UserInfo);
 
             // Cache entry updated with new access token
-            var entry = await context.TokenCache.LoadFromCache(new CacheQueryData
+            var entry = await context.TokenCache.LoadFromCacheAsync(new CacheQueryData
             {
                 Authority = TestConstants.DefaultAuthorityHomeTenant,
                 Resource = TestConstants.DefaultResource,
@@ -268,7 +268,7 @@ namespace Test.ADAL.NET.Integration
                 UniqueId = TestConstants.DefaultUniqueId,
                 DisplayableId = TestConstants.DefaultDisplayableId
             },
-            new RequestContext(new AdalLogger(new Guid())));
+            new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
             Assert.AreEqual("some-access-token", entry.Result.AccessToken);
 
             // There should be one cached entry.
@@ -280,7 +280,7 @@ namespace Test.ADAL.NET.Integration
 
         [TestMethod]
         [Description("Test case where user realm discovery fails.")]
-        public void UserRealmDiscoveryFailsTestAsync()
+        public void UserRealmDiscoveryFailsTest()
         {
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
 
@@ -313,7 +313,7 @@ namespace Test.ADAL.NET.Integration
         public async Task UnknownUserRealmDiscoveryTestAsync()
         {
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
-            await context.Authenticator.UpdateFromTemplateAsync(null);
+            await context.Authenticator.UpdateFromTemplateAsync(null).ConfigureAwait(false);
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" + TestConstants.DefaultDisplayableId)
             {

@@ -68,7 +68,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Get WsTrust Address from mex")]
-        public async Task MexParserGetWsTrustAddressTest()
+        public async Task MexParserGetWsTrustAddressTestAsync()
         {
             HttpMessageHandlerFactory.InitializeMockProvider();
 
@@ -81,7 +81,7 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            WsTrustAddress address = await MexParser.FetchWsTrustAddressFromMexAsync(TestConstants.DefaultAuthorityCommonTenant, UserAuthType.IntegratedAuth, null);
+            WsTrustAddress address = await MexParser.FetchWsTrustAddressFromMexAsync(TestConstants.DefaultAuthorityCommonTenant, UserAuthType.IntegratedAuth, null).ConfigureAwait(false);
             Assert.IsNotNull(address);
 
             // All mocks are consumed
@@ -90,11 +90,11 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("User Realm Discovery Test")]
-        public async Task UserRealmDiscoveryTest()
+        public async Task UserRealmDiscoveryTestAsync()
         {
             AuthenticationContext context = new AuthenticationContext(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" 
                 + TestConstants.DefaultDisplayableId, new TokenCache());
-            await context.Authenticator.UpdateFromTemplateAsync(null);
+            await context.Authenticator.UpdateFromTemplateAsync(null).ConfigureAwait(false);
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" 
                 + TestConstants.DefaultDisplayableId)
@@ -114,8 +114,8 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, 
-                new RequestContext(new AdalLogger(new Guid())));
+            UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId,
+                new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
             VerifyUserRealmResponse(userRealmResponse, "Federated");
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/"
@@ -131,7 +131,7 @@ namespace Test.ADAL.NET.Unit
                     {"api-version", "1.0"}
                 }
             });
-            userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, new RequestContext(new AdalLogger(new Guid())));
+            userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
             VerifyUserRealmResponse(userRealmResponse, "Unknown");
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/"
@@ -152,10 +152,10 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Cloud Audience Urn Test")]
-        public async Task CloudAudienceUrnTest()
+        public async Task CloudAudienceUrnTestAsync()
         {
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
-            await context.Authenticator.UpdateFromTemplateAsync(null);
+            await context.Authenticator.UpdateFromTemplateAsync(null).ConfigureAwait(false);
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/"
                 + TestConstants.DefaultDisplayableId)
@@ -177,7 +177,7 @@ namespace Test.ADAL.NET.Unit
             });
 
             UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId,
-                new RequestContext(new AdalLogger(new Guid())));
+                new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
 
             WsTrustAddress address = new WsTrustAddress()
             {
@@ -194,7 +194,7 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(address, new UserCredential(TestConstants.DefaultDisplayableId), null, userRealmResponse.CloudAudienceUrn);
+            WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(address, new UserCredential(TestConstants.DefaultDisplayableId), null, userRealmResponse.CloudAudienceUrn).ConfigureAwait(false);
 
             VerifyCloudInstanceUrnResponse("urn:federation:Blackforest", userRealmResponse.CloudAudienceUrn);
 
@@ -204,10 +204,10 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Cloud Audience Urn Null Test")]
-        public async Task CloudAudienceUrnNullTest()
+        public async Task CloudAudienceUrnNullTestAsync()
         {
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
-            await context.Authenticator.UpdateFromTemplateAsync(null);
+            await context.Authenticator.UpdateFromTemplateAsync(null).ConfigureAwait(false);
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" + TestConstants.DefaultDisplayableId)
             {
@@ -227,7 +227,7 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, new RequestContext(new AdalLogger(new Guid())));
+            UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(context.Authenticator.UserRealmUri, TestConstants.DefaultDisplayableId, new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
 
             WsTrustAddress address = new WsTrustAddress()
             {
@@ -244,7 +244,7 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(address, new UserCredential(TestConstants.DefaultDisplayableId), null, null);
+            WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(address, new UserCredential(TestConstants.DefaultDisplayableId), null, null).ConfigureAwait(false);
 
             VerifyCloudInstanceUrnResponse("urn:federation:MicrosoftOnline", userRealmResponse.CloudAudienceUrn);
 
@@ -254,7 +254,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("WS-Trust Address Extraction Test")]
-        public async Task WsTrust2005AddressExtractionTest()
+        public async Task WsTrust2005AddressExtractionTestAsync()
         {
             await Task.Factory.StartNew(() =>
             {
@@ -271,12 +271,12 @@ namespace Test.ADAL.NET.Unit
                 wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.UsernamePassword, null);
                 Assert.IsNotNull(wsTrustAddress);
                 Assert.AreEqual(wsTrustAddress.Version, WsTrustVersion.WsTrust2005);
-            });
+            }).ConfigureAwait(false);
         }
 
         [TestMethod]
         [Description("WS-Trust Request Test")]
-        public async Task WsTrustRequestTest()
+        public async Task WsTrustRequestTestAsync()
         {
             HttpMessageHandlerFactory.InitializeMockProvider();
 
@@ -305,10 +305,10 @@ namespace Test.ADAL.NET.Unit
                 }
             });
             
-            WsTrustResponse wstResponse = await WsTrustRequest.SendRequestAsync(address, new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword), null, TestConstants.CloudAudienceUrnMicrosoft);
+            WsTrustResponse wstResponse = await WsTrustRequest.SendRequestAsync(address, new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword), null, TestConstants.CloudAudienceUrnMicrosoft).ConfigureAwait(false);
             Assert.IsNotNull(wstResponse.Token);
 
-            wstResponse = await WsTrustRequest.SendRequestAsync(address, new UserCredential(TestConstants.DefaultDisplayableId), null, TestConstants.CloudAudienceUrnMicrosoft);
+            wstResponse = await WsTrustRequest.SendRequestAsync(address, new UserCredential(TestConstants.DefaultDisplayableId), null, TestConstants.CloudAudienceUrnMicrosoft).ConfigureAwait(false);
             Assert.IsNotNull(wstResponse.Token);
 
             // All mocks are consumed
@@ -317,7 +317,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("WS-Trust Request Generic Cloud Urn Test")]
-        public async Task WsTrustRequestGenericCloudUrnTest()
+        public async Task WsTrustRequestGenericCloudUrnTestAsync()
         {
             HttpMessageHandlerFactory.InitializeMockProvider();
 
@@ -347,10 +347,10 @@ namespace Test.ADAL.NET.Unit
                 }
             });
 
-            WsTrustResponse wstResponse = await WsTrustRequest.SendRequestAsync(address, new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword), null, TestConstants.CloudAudienceUrn);
+            WsTrustResponse wstResponse = await WsTrustRequest.SendRequestAsync(address, new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword), null, TestConstants.CloudAudienceUrn).ConfigureAwait(false);
             Assert.IsNotNull(wstResponse.Token);
 
-            wstResponse = await WsTrustRequest.SendRequestAsync(address, new UserCredential(TestConstants.DefaultDisplayableId), null, TestConstants.CloudAudienceUrn);
+            wstResponse = await WsTrustRequest.SendRequestAsync(address, new UserCredential(TestConstants.DefaultDisplayableId), null, TestConstants.CloudAudienceUrn).ConfigureAwait(false);
             Assert.IsNotNull(wstResponse.Token);
 
             // All mocks are consumed

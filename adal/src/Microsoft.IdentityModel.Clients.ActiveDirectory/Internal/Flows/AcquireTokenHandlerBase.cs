@@ -164,7 +164,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
-                    ResultEx = await this.tokenCache.LoadFromCache(CacheQueryData, RequestContext).ConfigureAwait(false);
+                    ResultEx = await this.tokenCache.LoadFromCacheAsync(CacheQueryData, RequestContext).ConfigureAwait(false);
                     extendedLifetimeResultEx = ResultEx;
 
                     if (ResultEx?.Result != null &&
@@ -174,7 +174,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                         ResultEx = await this.RefreshAccessTokenAsync(ResultEx).ConfigureAwait(false);
                         if (ResultEx != null && ResultEx.Exception == null)
                         {
-                            notifiedBeforeAccessCache = await StoreResultExToCache(notifiedBeforeAccessCache).ConfigureAwait(false);
+                            notifiedBeforeAccessCache = await StoreResultExToCacheAsync(notifiedBeforeAccessCache).ConfigureAwait(false);
                         }
                     }
                 }
@@ -183,13 +183,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                 {
                     if (brokerHelper.CanInvokeBroker)
                     {
-                        ResultEx = await brokerHelper.AcquireTokenUsingBroker(brokerParameters).ConfigureAwait(false);
+                        ResultEx = await brokerHelper.AcquireTokenUsingBrokerAsync(brokerParameters).ConfigureAwait(false);
                     }
                     else
                     {
-                        await this.PreTokenRequest().ConfigureAwait(false);
+                        await this.PreTokenRequestAsync().ConfigureAwait(false);
                         // check if broker app installation is required for authentication.
-                        await CheckAndAcquireTokenUsingBroker().ConfigureAwait(false);
+                        await CheckAndAcquireTokenUsingBrokerAsync().ConfigureAwait(false);
                     }
 
                     //broker token acquisition failed
@@ -198,8 +198,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                         throw ResultEx.Exception;
                     }
 
-                    await this.PostTokenRequest(ResultEx).ConfigureAwait(false);
-                    notifiedBeforeAccessCache = await StoreResultExToCache(notifiedBeforeAccessCache).ConfigureAwait(false);
+                    await this.PostTokenRequestAsync(ResultEx).ConfigureAwait(false);
+                    notifiedBeforeAccessCache = await StoreResultExToCacheAsync(notifiedBeforeAccessCache).ConfigureAwait(false);
                 }
 
                 await this.PostRunAsync(ResultEx.Result).ConfigureAwait(false);
@@ -229,7 +229,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             }
         }
 
-        private async Task<bool> StoreResultExToCache(bool notifiedBeforeAccessCache)
+        private async Task<bool> StoreResultExToCacheAsync(bool notifiedBeforeAccessCache)
         {
             if (this.StoreToCache)
             {
@@ -239,17 +239,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                     notifiedBeforeAccessCache = true;
                 }
 
-                await this.tokenCache.StoreToCache(ResultEx, this.Authenticator.Authority, this.Resource,
+                await this.tokenCache.StoreToCacheAsync(ResultEx, this.Authenticator.Authority, this.Resource,
                     this.ClientKey.ClientId, this.TokenSubjectType, RequestContext).ConfigureAwait(false);
             }
             return notifiedBeforeAccessCache;
         }
 
-        private async Task CheckAndAcquireTokenUsingBroker()
+        private async Task CheckAndAcquireTokenUsingBrokerAsync()
         {
             if (this.BrokerInvocationRequired())
             {
-                ResultEx = await brokerHelper.AcquireTokenUsingBroker(brokerParameters).ConfigureAwait(false);
+                ResultEx = await brokerHelper.AcquireTokenUsingBrokerAsync(brokerParameters).ConfigureAwait(false);
             }
             else
             {
@@ -284,26 +284,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             this.ValidateAuthorityType();
         }
 
-        protected virtual Task PreTokenRequest()
+        protected virtual Task PreTokenRequestAsync()
         {
             return CompletedTask;
         }
         
-        protected async Task UpdateAuthority(string updatedAuthority)
+        protected async Task UpdateAuthorityAsync(string updatedAuthority)
         {
             if(!Authenticator.Authority.Equals(updatedAuthority))
             {
-                await Authenticator.UpdateAuthority(updatedAuthority, RequestContext).ConfigureAwait(false);
+                await Authenticator.UpdateAuthorityAsync(updatedAuthority, RequestContext).ConfigureAwait(false);
                 this.ValidateAuthorityType();
             }
         }
 
-        protected virtual async Task PostTokenRequest(AdalResultWrapper resultEx)
+        protected virtual async Task PostTokenRequestAsync(AdalResultWrapper resultEx)
         {
             // if broker returned Authority update Authentiator
             if(!string.IsNullOrEmpty(resultEx.Result.Authority))
             {
-                await UpdateAuthority(resultEx.Result.Authority).ConfigureAwait(false);
+                await UpdateAuthorityAsync(resultEx.Result.Authority).ConfigureAwait(false);
             }
 
             this.Authenticator.UpdateTenantId(resultEx.Result.TenantId);

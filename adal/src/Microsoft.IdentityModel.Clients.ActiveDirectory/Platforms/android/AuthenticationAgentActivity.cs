@@ -140,7 +140,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                     }
 
                     Dictionary<string, string> keyPair = EncodingHelper.ParseKeyValueList(query, '&', true, false, null);
-                    string responseHeader = DeviceAuthHelper.CreateDeviceAuthChallengeResponse(keyPair).Result;
+                    string responseHeader = DeviceAuthHelper.CreateDeviceAuthChallengeResponseAsync(keyPair).Result;
                     Dictionary<string, string> pkeyAuthEmptyResponse = new Dictionary<string, string>();
                     pkeyAuthEmptyResponse[BrokerConstants.ChallangeResponseHeader] = responseHeader;
                     view.LoadUrl(keyPair["SubmitUrl"], pkeyAuthEmptyResponse);
